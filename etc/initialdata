@@ -1,0 +1,16 @@
+use strict;
+use warnings;
+
+our @CustomFields = (
+    {   Name        => 'Last Login',
+        Type        => 'DateTime',
+        MaxValues   => 1,
+        LookupType  => 'RT::User',
+        Description => 'Timestamp of the last successful password login '
+                      . '(SelfService/portal users only; maintained by '
+                      . 'RT-Extension-LastLogin)',
+        # No ApplyTo => applied globally, as required for User custom fields.
+    },
+);
+
+1;

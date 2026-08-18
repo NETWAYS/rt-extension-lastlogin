@@ -1,0 +1,5 @@
+<%init>
+# %ARGS includes the plaintext password submitted on the login form
+# (as $ARGS{pass}) - never log %ARGS here.
+RT::Extension::LastLogin->RecordLogin( User => $session{'CurrentUser'} );
+</%init>

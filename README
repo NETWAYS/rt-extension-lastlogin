@@ -1,0 +1,99 @@
+  RecordLogin { User => RT::User|RT::CurrentUser }
+    Stamps the given user's "Last Login" custom field with the current time.
+    Called from the "SuccessfulLogin" callback after a successful password
+    login (see
+    html/Callbacks/RT-Extension-LastLogin/autohandler/SuccessfulLogin).
+
+    Always re-loads the user as "RT->SystemUser" rather than trusting the
+    rights of the user who just logged in - a SelfService/portal user
+    normally lacks "SeeCustomField"/"ModifyCustomField" on themselves. Never
+    dies: any failure is logged and swallowed, since a broken write here
+    must not break the login itself.
+
+  _ShouldSkip { LastValue => STR|undef, MinInterval => SECONDS, Now => UNIX_EPOCH }
+    Pure throttle decision, split out of "RecordLogin" so it is unit
+    testable without a database: true if "LastValue" parses to a time less
+    than "MinInterval" seconds before "Now". "MinInterval" of 0 (the
+    default) or a missing/unparseable "LastValue" (first login) never skips.
+
+    Parses "LastValue" with "Format => 'iso'", not 'unknown': the value is
+    always one this module wrote itself (via "W3CDTF" in RT::Date), so the
+    exact format is known, and 'unknown' would pull in "Time::ParseDate" for
+    no reason - RT::Date's own docs call that "a heavyweight operation that
+    should never be called from within RT's core".
+
+NAME
+    RT::Extension::LastLogin - Records the timestamp of a user's last
+    successful login
+
+DESCRIPTION
+    Stamps a global "Last Login" custom field on "RT::User" with the current
+    time whenever a user successfully logs in through the password login
+    form (SelfService/portal or Staff). The value is stored as a standard
+    "DateTime" custom field, so it is returned automatically by "GET
+    /REST/2.0/user/:id" without any REST2 changes.
+
+    Only password logins
+    ("RT::Interface::Web::AttemptPasswordAuthentication") are covered.
+    SAML/external-auth logins fire a separate callback
+    ("ExternalAuthSuccessfulLogin") that this extension does not hook.
+
+RT VERSION
+    Works with RT 6.0.0 and later.
+
+INSTALLATION
+    "perl -I. Makefile.PL"
+        The "-I." is required: modern Perl does not keep "." in @INC, and
+        "use inc::Module::Install" must find the bundled inc/ directory.
+
+    "make"
+    "make install"
+        May need root permissions.
+
+    Register the "Last Login" custom field
+        "make install" does not load etc/initialdata. Run once per RT
+        instance:
+
+            /opt/rt/sbin/rt-setup-database --action insert \
+                --datafile /opt/rt/local/plugins/RT-Extension-LastLogin/etc/initialdata
+
+    Edit your /opt/rt/etc/RT_SiteConfig.pm
+            Plugin('RT::Extension::LastLogin');
+
+    Clear your Mason cache and restart the webserver
+            rm -rf /opt/rt/var/mason_data/obj
+
+CONFIGURATION
+    All configuration is optional; sensible defaults apply.
+
+  $LastLogin_CustomFieldName
+    Name of the custom field to update. Default: "Last Login".
+
+  $LastLogin_RecordTransaction
+    If true, also records a transaction on the user for every login (visible
+    in the user's history). Default: 0 (update the custom field value only,
+    no history entry per login).
+
+  $LastLogin_MinInterval
+    Minimum number of seconds between two recorded updates for the same
+    user; 0 (default) always updates.
+
+CAVEATS
+  Renaming the custom field breaks lookup silently
+    "RecordLogin" finds the custom field by the name in
+    $LastLogin_CustomFieldName, not by id. Renaming "Last Login" in Admin >
+    Custom Fields (without updating the config to match) makes every login
+    log a "custom field '...' not found" warning and stop updating the
+    timestamp - logins themselves are unaffected, but the data goes stale
+    without any user-visible error.
+
+AUTHOR
+    NETWAYS GmbH <support@netways.de>
+
+LICENSE AND COPYRIGHT
+    This software is Copyright (c) 2026 by NETWAYS GmbH
+
+    This is free software, licensed under:
+
+      The GNU General Public License, Version 2, June 1991
+
