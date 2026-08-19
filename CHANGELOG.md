@@ -4,8 +4,8 @@
 
 - Also record logins via `ExternalAuthSuccessfulLogin` (REMOTE_USER-based
   external auth: SAML, reverse-proxy header auth, etc.), not just password
-  logins. Verified by code symmetry with the already-tested `SuccessfulLogin`
-  path only - this devkit has no external-auth setup to exercise it live.
+  logins. Verified end-to-end in the devkit with a temporary PSGIWrap test
+  harness injecting REMOTE_USER (not part of this extension).
 
 ## v0.0.9 (2026-08-18)
 
