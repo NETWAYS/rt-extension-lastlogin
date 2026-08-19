@@ -4,7 +4,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-our $VERSION = '0.1.0';
+our $VERSION = '1.0.0';
 
 =head2 RecordLogin { User => RT::User|RT::CurrentUser }
 

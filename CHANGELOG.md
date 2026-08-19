@@ -1,5 +1,11 @@
 # Change Log
 
+## v1.0.0 (2026-08-19)
+
+First stable release. Both login hooks (password and REMOTE_USER-based
+external auth) are verified end-to-end in the RT 6.0.3 devkit; no known
+bugs. Not yet run against a production RT instance.
+
 ## v0.1.0 (2026-08-19)
 
 - Also record logins via `ExternalAuthSuccessfulLogin` (REMOTE_USER-based
