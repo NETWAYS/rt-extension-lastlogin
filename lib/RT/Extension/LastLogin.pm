@@ -4,13 +4,17 @@ use 5.10.1;
 use strict;
 use warnings;
 
-our $VERSION = '0.0.9';
+our $VERSION = '0.1.0';
 
 =head2 RecordLogin { User => RT::User|RT::CurrentUser }
 
 Stamps the given user's "Last Login" custom field with the current time.
 Called from the C<SuccessfulLogin> callback after a successful password
-login (see F<html/Callbacks/RT-Extension-LastLogin/autohandler/SuccessfulLogin>).
+login, and from the C<ExternalAuthSuccessfulLogin> callback after a
+successful REMOTE_USER-based external login (SAML, reverse-proxy header
+auth, etc.) - see
+F<html/Callbacks/RT-Extension-LastLogin/autohandler/SuccessfulLogin> and
+F<html/Callbacks/RT-Extension-LastLogin/autohandler/ExternalAuthSuccessfulLogin>.
 
 Always re-loads the user as C<RT-E<gt>SystemUser> rather than trusting the
 rights of the user who just logged in - a SelfService/portal user normally
@@ -101,14 +105,12 @@ RT::Extension::LastLogin - Records the timestamp of a user's last successful log
 =head1 DESCRIPTION
 
 Stamps a global "Last Login" custom field on C<RT::User> with the current
-time whenever a user successfully logs in through the password login form
-(SelfService/portal or Staff). The value is stored as a standard
-C<DateTime> custom field, so it is returned automatically by
-C<GET /REST/2.0/user/:id> without any REST2 changes.
-
-Only password logins (C<RT::Interface::Web::AttemptPasswordAuthentication>)
-are covered. SAML/external-auth logins fire a separate callback
-(C<ExternalAuthSuccessfulLogin>) that this extension does not hook.
+time whenever a user successfully logs in - through the password login form
+(SelfService/portal or Staff) or via REMOTE_USER-based external auth (SAML,
+reverse-proxy header auth, etc., if C<$WebRemoteUserAuth> is configured).
+The value is stored as a standard C<DateTime> custom field, so it is
+returned automatically by C<GET /REST/2.0/user/:id> without any REST2
+changes.
 
 =head1 RT VERSION
 

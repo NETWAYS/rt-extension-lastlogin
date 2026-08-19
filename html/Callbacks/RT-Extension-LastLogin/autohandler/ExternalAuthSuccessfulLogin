@@ -1,0 +1,5 @@
+<%init>
+# %ARGS is the original request's args, replayed here - avoid logging it
+# wholesale, it may still carry page-specific query/form parameters.
+RT::Extension::LastLogin->RecordLogin( User => $session{'CurrentUser'} );
+</%init>

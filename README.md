@@ -4,14 +4,11 @@ Records the timestamp of a user's last successful login on
 [Request Tracker 6](https://bestpractical.com/rt).
 
 Stamps a global "Last Login" custom field on `RT::User` with the current
-time whenever a user successfully logs in through the password login form
-(SelfService/portal or Staff). The value is stored as a standard `DateTime`
-custom field, so it is returned automatically by `GET /REST/2.0/user/:id`
-without any REST2 changes.
-
-Only password logins (`RT::Interface::Web::AttemptPasswordAuthentication`)
-are covered. SAML/external-auth logins fire a separate callback
-(`ExternalAuthSuccessfulLogin`) that this extension does not hook.
+time whenever a user successfully logs in - through the password login form
+(SelfService/portal or Staff) or via REMOTE_USER-based external auth (SAML,
+reverse-proxy header auth, etc., if `$WebRemoteUserAuth` is configured). The
+value is stored as a standard `DateTime` custom field, so it is returned
+automatically by `GET /REST/2.0/user/:id` without any REST2 changes.
 
 ## Installation
 
